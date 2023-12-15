@@ -1,28 +1,44 @@
 /* eslint-disable react/no-unescaped-entities */
 import { Box, Container, Grid, Typography, Button } from "@mui/material";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import Confetti from "react-confetti";
 
 function SharleysLandingPage() {
+  const isClient = typeof window !== "undefined"; // Check if running on the client side
+
   const [windowDimension, setDimension] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: isClient ? window?.innerWidth : undefined,
+    height: isClient ? window?.innerHeight : undefined,
   });
+
   const detectSize = () => {
-    setDimension({ width: window.innerWidth, height: window.innerHeight });
+    setDimension({
+      width: isClient ? window.innerWidth : undefined,
+      height: isClient ? window.innerHeight : undefined,
+    });
   };
-  useEffect(() => {
-    window.addEventListener("resize", detectSize);
-    return () => {
-      window.removeEventListener("resize", detectSize);
-    };
-  }, [windowDimension]);
+
+  useLayoutEffect(() => {
+    if (isClient) {
+      detectSize(); // Get initial window dimensions
+
+      window.addEventListener("resize", detectSize);
+
+      return () => {
+        window.removeEventListener("resize", detectSize);
+      };
+    }
+  }, [isClient]);
+
   return (
-    <Box
-      sx={{ backgroundColor: "#002854", padding: "50px 0", minHeight: "100vh" }}
-    >
-      <Confetti width={windowDimension.width} height={windowDimension.height} />
+    <Box sx={{ backgroundColor: "#002854", minHeight: "100vh" }}>
+      {isClient && (
+        <Confetti
+          width={windowDimension.width}
+          height={windowDimension.height}
+        />
+      )}
 
       <Container maxWidth="lg">
         {/* Hero Section */}
